@@ -40,7 +40,8 @@ class Game:
         self.running = False
         self.shooting = False
 
-        pygame.mixer.music.load(os.path.join(__file__, "music", "02 Main Theme.ogg"))
+        base_dir = directory_path = os.getcwd()
+        pygame.mixer.music.load(os.path.join(base_dir, RESOURCE_DIR, "music", "02 Main Theme.ogg"))
         pygame.mixer.music.play(-1)
 
         # load data from pytmx
@@ -80,10 +81,13 @@ class Game:
         self.group.add(self.player)
         self.group.add(self.npc_1)
 
+        self.init_textedit()
+
+
     def init_textedit(self):
 
-        self.text = 'this text is editable'
-        self.font = pygame.font.SysFont(None, 48)
+        self.text = ""
+        self.font = pygame.font.SysFont(None, 64)
         self.text_image = self.font.render(self.text, True, RED)
 
         self.text_rect = self.text_image.get_rect()
@@ -101,6 +105,11 @@ class Game:
 
         # draw the map and all sprites
         self.group.draw(self.screen)
+
+
+        self.screen.blit(self.text_image, self.text_rect)
+        if time.time() % 1 > 0.5:
+            pygame.draw.rect(self.screen, RED, self.text_cursor)
 
     def handle_input(self) -> None:
         """Handle pygame input events"""
@@ -153,13 +162,13 @@ class Game:
 
                 elif event.key == K_BACKSPACE:
                     if len(self.text) > 0:
-                        text = self.text[:-1]
-                        self.text_image = self.font.render(text, True, RED)
+                        self.text = self.text[:-1]
+                        self.text_image = self.font.render(self.text, True, RED)
                         self.text_rect.size = self.text_image.get_size()
                         self.text_cursor.topleft = self.text_rect.topright
                 else:
-                    text += event.unicode
-                    self.text_image = self.font.render(text, True, RED)
+                    self.text += event.unicode
+                    self.text_image = self.font.render(self.text, True, RED)
                     self.text_rect.size = self.text_image.get_size()
                     self.text_cursor.topleft = self.text_rect.topright
 
@@ -187,9 +196,14 @@ class Game:
             if sprite.feet.collidelist(self.walls) > -1:
                 sprite.move_back(dt)
 
-        self.screen.blit(self.text_image, self.text_rect)
-        if time.time() % 1 > 0.5:
-            pygame.draw.rect(self.screen, RED, self.text_cursor)
+        self.text = f"X: {self.npc_1.position[0]:.2f} Y: {self.npc_1.position[1]:.2f}"
+        self.text_image = self.font.render(self.text, True, RED)
+
+        self.text_rect = self.text_image.get_rect()
+        self.text_rect.topleft = (20, 20)
+
+        self.text_cursor = pygame.locals.Rect(self.text_rect.topright, (3, self.text_rect.height))
+
 
     def run(self):
         """Run the game loop"""
