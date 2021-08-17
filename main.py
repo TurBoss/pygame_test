@@ -21,6 +21,7 @@ from player import Player
 
 # simple wrapper to keep the screen resizeable
 from text_edit import TextEdit
+from warp_point import WarpPoint
 
 
 def init_screen(width: int, height: int) -> pygame.Surface:
@@ -52,9 +53,13 @@ class Game:
 
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls = []
+        self.warps = dict()
 
         for obj in tmx_data.objects:
-            self.walls.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
+            if obj.type == "warp":
+                self.warps[obj.name] = WarpPoint(obj)
+            else:
+                self.walls.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
 
         # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(tmx_data)
@@ -168,9 +173,9 @@ class Game:
                     self.player.velocity[1] = 0
 
             # this will be handled if the window is resized
-            elif event.type == VIDEORESIZE:
-                self.screen = init_screen(event.w, event.h)
-                self.map_layer.set_size((event.w, event.h))
+            # elif event.type == VIDEORESIZE:
+            #     self.screen = init_screen(event.w, event.h)
+            #     self.map_layer.set_size((event.w, event.h))
 
             event = poll()
 
@@ -185,6 +190,12 @@ class Game:
             if isinstance(sprite, Player) or isinstance(sprite, Npc):
                 if sprite.feet.collidelist(self.walls) > -1:
                     sprite.move_back(dt)
+                for name, warp in self.warps.items():
+                    if sprite.feet.colliderect(warp.get_rect()):
+                        self.warps[name].go_inside(self.player)
+                    else:
+                        self.warps[name].go_outisde()
+
             elif isinstance(sprite, TextEdit):
                 self.npc_1_position_x.position = [self.player.position[0] + -40, self.player.position[1] - 40]
                 self.npc_1_position_y.position = [self.player.position[0] + -40, self.player.position[1] - 60]
@@ -197,7 +208,7 @@ class Game:
         clock = pygame.time.Clock()
         self.running = True
 
-        times = deque(maxlen=30)
+        times = deque(maxlen=60)
 
         try:
             while self.running:

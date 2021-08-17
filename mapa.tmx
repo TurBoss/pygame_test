@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.1" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="17">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="23">
  <tileset firstgid="1" source="atlas.tsx"/>
  <layer id="1" name="Ground1" width="64" height="64">
   <data encoding="csv">
@@ -205,7 +205,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="3" name="Object Layer 1">
+ <objectgroup color="#3584e4" id="3" name="Object Layer 1">
   <object id="4" x="101.333" y="53.3333" width="88.6667" height="99.3333"/>
   <object id="5" x="96.6667" y="246.667" width="91.3333" height="99.3333"/>
   <object id="6" x="354.667" y="149.333" width="88" height="98.6667"/>
@@ -218,4 +218,16 @@
    <ellipse/>
   </object>
  </objectgroup>
+ <objectgroup color="#c061cb" id="5" name="warps">
+  <object id="17" name="TestWarp" type="warp" x="1013" y="988.5" width="54.5" height="58.5">
+   <ellipse/>
+  </object>
+  <object id="21" x="1265.33" y="1057.33">
+   <point/>
+  </object>
+  <object id="22" x="1128.67" y="1151.33">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="Object Layer 3"/>
 </map>
