@@ -4,9 +4,9 @@ from collections import deque
 
 import pygame
 
-from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP
+from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, KEYDOWN, KEYUP
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_MINUS, K_PLUS, K_ESCAPE, K_BACKSPACE
-from pygame.locals import KEYDOWN, VIDEORESIZE, QUIT
+from pygame.locals import VIDEORESIZE, QUIT
 
 from pytmx.util_pygame import load_pygame
 
@@ -15,13 +15,15 @@ import pyscroll.data
 from pyscroll.group import PyscrollGroup
 
 from constants import RESOURCE_DIR, RED, GRAY
+
+from field import Field
+
 from npc import Npc
 from player import Player
 
 
 # simple wrapper to keep the screen resizeable
 from text_edit import TextEdit
-from warp_point import WarpPoint
 
 
 def init_screen(width: int, height: int) -> pygame.Surface:
@@ -36,80 +38,29 @@ class Game:
     Finally, it uses a pyscroll group to render the map and Hero.
     """
 
-    map_path = "mapa.tmx"
-
     def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
 
         self.running = False
         self.shooting = False
 
-        base_dir = directory_path = os.getcwd()
-        pygame.mixer.music.load(os.path.join(base_dir, RESOURCE_DIR, "music", "02 Main Theme.ogg"))
-        pygame.mixer.music.play(-1)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        music_path = os.path.join(base_dir,
+                                  RESOURCE_DIR,
+                                  "music",
+                                  "02 Main Theme.ogg")
 
-        # load data from pytmx
-        tmx_data = load_pygame(self.map_path)
+        # pygame.mixer.music.load(music_path)
+        # pygame.mixer.music.play(-1)
 
-        # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = []
-        self.warps = dict()
-
-        for obj in tmx_data.objects:
-            if obj.type == "warp":
-                self.warps[obj.name] = WarpPoint(obj)
-            else:
-                self.walls.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
-
-        # create new data source for pyscroll
-        map_data = pyscroll.data.TiledMapData(tmx_data)
-
-        # create new renderer (camera)
-        self.map_layer = pyscroll.BufferedRenderer(
-            map_data, screen.get_size(), clamp_camera=False, tall_sprites=1
-        )
-        self.map_layer.zoom = 2
-
-        # pyscroll supports layered rendering.  our map has 3 'under' layers
-        # layers begin with 0, so the layers are 0, 1, and 2.
-        # since we want the sprite to be on top of layer 1, we set the default
-        # layer for sprites as 2
-        self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
-
-        self.hero_move_speed = 250  # pixels per second
-        self.player = Player(self, image="pocky.png")
-
-        self.npc_1 = Npc(self, self.player, "pocky.png", True)
-
-        self.npc_1_position_x = TextEdit("X", size=32, color=RED, width=100, height=100)
-        self.npc_1_position_y = TextEdit("Y", size=32, color=RED, width=100, height=100)
-
-        # put the hero in the center of the map
-        self.player.position = [400, 300]
-        self.npc_1.position = [300, 300]
-
-        # add our hero to the group
-        self.group.add(self.player)
-        self.group.add(self.npc_1)
-        self.group.add(self.npc_1_position_x)
-        self.group.add(self.npc_1_position_y)
-
-    def add_bullet(self, bullet):
-        self.group.add(bullet)
+        self.field = Field("01_map.tmx", self.screen.get_size())
 
     def draw(self) -> None:
-
-        # center the map/screen on our Hero
-        self.group.center(self.player.rect.center)
-
-        # draw the map and all sprites
-        self.group.draw(self.screen)
+        self.field.draw(self.screen)
 
     def handle_input(self) -> None:
         """Handle pygame input events"""
         poll = pygame.event.poll
-
-        dead_zone = 0.25
 
         event = poll()
 
@@ -118,59 +69,11 @@ class Game:
                 self.running = False
                 break
 
-            elif event.type == JOYAXISMOTION:
-                if event.axis == 0 or event.axis == 1:
-                    if abs(event.value) > dead_zone:
-
-                        self.player.velocity[event.axis] = event.value * self.hero_move_speed
-                    else:
-                        self.player.velocity[event.axis] = 0
-                elif event.axis == 3:
-                    if event.value > dead_zone or event.value < dead_zone:
-                        self.map_layer.zoom += event.value / 10
-
-            elif event.type == JOYBUTTONDOWN:
-                if event.button == 2:
-                    self.npc_1.shoot()
-                    self.player.shoot()
-
-            elif event.type == JOYBUTTONUP:
-                if event.button == 2:
-                    pass
-
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     break
 
-                elif event.key == K_LEFT:
-                    self.player.velocity[0] = -self.hero_move_speed
-
-                elif event.key == K_RIGHT:
-                    self.player.velocity[0] = self.hero_move_speed
-
-                elif event.key == K_UP:
-                    self.player.velocity[1] = -self.hero_move_speed
-
-                elif event.key == K_DOWN:
-                    self.player.velocity[1] = self.hero_move_speed
-
-                # elif event.key == K_BACKSPACE:
-                #     if len(self.text) > 0:
-                #         self.text = self.text[:-1]
-                #         self.text_image = self.font.render(self.text, True, RED)
-                #         self.text_rect.size = self.text_image.get_size()
-                #         self.text_cursor.topleft = self.text_rect.topright
-                # else:
-                #     self.text += event.unicode
-                #     self.text_image = self.font.render(self.text, True, RED)
-                #     self.text_rect.size = self.text_image.get_size()
-                #     self.text_cursor.topleft = self.text_rect.topright
-
-            elif event.type == KEYUP:
-                if event.key == K_LEFT or event.key == K_RIGHT:
-                    self.player.velocity[0] = 0
-                elif event.key == K_UP or event.key == K_DOWN:
-                    self.player.velocity[1] = 0
+            self.field.handle_input(event)
 
             # this will be handled if the window is resized
             # elif event.type == VIDEORESIZE:
@@ -181,27 +84,7 @@ class Game:
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
-        self.group.update(dt)
-
-        # check if the sprite's feet are colliding with wall
-        # sprite must have a rect called feet, and move_back method,
-        # otherwise this will fail
-        for sprite in self.group.sprites():
-            if isinstance(sprite, Player) or isinstance(sprite, Npc):
-                if sprite.feet.collidelist(self.walls) > -1:
-                    sprite.move_back(dt)
-                for name, warp in self.warps.items():
-                    if sprite.feet.colliderect(warp.get_rect()):
-                        self.warps[name].go_inside(self.player)
-                    else:
-                        self.warps[name].go_outisde()
-
-            elif isinstance(sprite, TextEdit):
-                self.npc_1_position_x.position = [self.player.position[0] + -40, self.player.position[1] - 40]
-                self.npc_1_position_y.position = [self.player.position[0] + -40, self.player.position[1] - 60]
-                self.npc_1_position_x.text = f"X {self.player.position[0]:.2f}"
-                self.npc_1_position_y.text = f"Y {self.player.position[1]:.2f}"
-
+        self.field.update(dt)
 
     def run(self):
         """Run the game loop"""
@@ -243,8 +126,10 @@ def main() -> None:
     try:
         game = Game(screen)
         game.run()
+
     except KeyboardInterrupt:
         pass
+
     finally:
         pygame.quit()
 

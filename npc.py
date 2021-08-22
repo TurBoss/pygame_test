@@ -20,7 +20,8 @@ class Npc(pygame.sprite.Sprite):
         self.game = game
         self.player = player
 
-        self.image_path = os.path.join(RESOURCE_DIR, image)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.image_path = os.path.join(base_dir, RESOURCE_DIR, image)
 
         self.follower = follower
 
@@ -187,7 +188,7 @@ class Npc(pygame.sprite.Sprite):
                 self.velocity[0] = error
             else:
                 self.velocity[0] = 0
-            
+
         if self.position[1] < self.player.position[1]:
             self.y_pid.set_setpoint(self.player.position[1])
             self.y_pid.update(self.position[1])

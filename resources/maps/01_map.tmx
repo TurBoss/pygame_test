@@ -219,7 +219,10 @@
   </object>
  </objectgroup>
  <objectgroup color="#c061cb" id="5" name="warps">
-  <object id="17" name="TestWarp" type="warp" x="1013" y="988.5" width="54.5" height="58.5">
+  <object id="17" name="TestWarp" type="warp" x="1023.33" y="1000.83" width="32.1667" height="43.1667">
+   <properties>
+    <property name="Map" value="02_map.tmx"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="21" x="1265.33" y="1057.33">

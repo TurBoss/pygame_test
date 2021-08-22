@@ -18,7 +18,9 @@ class Projectile(pygame.sprite.Sprite):
 
         self.player = player
 
-        self.image_path = os.path.join(RESOURCE_DIR, 'shoots', 'card_jap.png')
+        image = "card_jap.png"
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.image_path = os.path.join(base_dir, RESOURCE_DIR, "shoots", image)
 
         self.x = self.player.position[0] + self.player.rect.width * 0.5
         self.y = self.player.position[1] + self.player.rect.height * 0.5

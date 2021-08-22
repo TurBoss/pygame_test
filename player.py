@@ -18,7 +18,8 @@ class Player(pygame.sprite.Sprite):
 
         self.game = game
 
-        self.image_path = os.path.join(RESOURCE_DIR, image)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.image_path = os.path.join(base_dir, RESOURCE_DIR, image)
 
         self.width = 34
         self.height = 34
