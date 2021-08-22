@@ -1,5 +1,7 @@
 import os
 
+import pygame
+
 import pyscroll
 import pyscroll.data
 from pyscroll.group import PyscrollGroup
@@ -22,7 +24,17 @@ class Field(object):
         self.map_name = name
         self.screen_size = screen_size
 
+        self.fading = None
+        self.fade_end = False
+
+        self.alpha = 0
+        sr = Rect(0, 0, screen_size[0], screen_size[1])
+
+        self.fade_rect = pygame.Surface(sr.size)
+        self.fade_rect.fill((0, 0, 0))
+
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
         self.initialize()
 
     def initialize(self):
@@ -86,40 +98,6 @@ class Field(object):
         self.group.add(self.npc_1_position_x)
         self.group.add(self.npc_1_position_y)
 
-    def update(self, dt):
-        self.group.update(dt)
-
-        # check if the sprite's feet are colliding with wall
-        # sprite must have a rect called feet, and move_back method,
-        # otherwise this will fail
-        for sprite in self.group.sprites():
-            if isinstance(sprite, Player):
-                if sprite.feet.collidelist(self.walls) > -1:
-                    sprite.move_back(dt)
-                for name, warp in self.warps.items():
-                    if sprite.feet.colliderect(warp.get_rect()):
-                        self.warps[name].go_inside(self.player)
-                    else:
-                        self.warps[name].go_outisde()
-
-            elif isinstance(sprite, Npc):
-                if sprite.feet.collidelist(self.walls) > -1:
-                    sprite.move_back(dt)
-
-            elif isinstance(sprite, TextEdit):
-                self.npc_1_position_x.position = [self.player.position[0] + -40, self.player.position[1] - 40]
-                self.npc_1_position_y.position = [self.player.position[0] + -40, self.player.position[1] - 60]
-                self.npc_1_position_x.text = f"X {self.player.position[0]:.2f}"
-                self.npc_1_position_y.text = f"Y {self.player.position[1]:.2f}"
-
-    def draw(self, screen):
-
-        # center the map/screen on our Hero
-        self.group.center(self.player.rect.center)
-
-        # draw the map and all sprites
-        self.group.draw(screen)
-
     def handle_input(self, event):
 
         dead_zone = 0.25
@@ -136,15 +114,16 @@ class Field(object):
                     self.map_layer.zoom += event.value / 10
 
         elif event.type == JOYBUTTONDOWN:
-            if event.button == 2:
+            if event.button == 1:
+                self.npc_1.shoot()
+                self.player.shoot()
+
+            elif event.button == 0:
                 for name, warp in self.warps.items():
                     if warp.get_player():
                         map_name = warp.get_warp_map()
-                        print(f"Change Field {map_name}")
+                        print(f"Change Field {map_name} from warp name {name}")
                         self.change_field(map_name)
-
-                self.npc_1.shoot()
-                self.player.shoot()
 
         elif event.type == JOYBUTTONUP:
             if event.button == 2:
@@ -181,11 +160,65 @@ class Field(object):
             elif event.key == K_UP or event.key == K_DOWN:
                 self.player.velocity[1] = 0
 
+    def update(self, dt):
+        self.group.update(dt)
+
+        # check if the sprite's feet are colliding with wall
+        # sprite must have a rect called feet, and move_back method,
+        # otherwise this will fail
+        for sprite in self.group.sprites():
+            if isinstance(sprite, Player):
+                if sprite.feet.collidelist(self.walls) > -1:
+                    sprite.move_back(dt)
+                for name, warp in self.warps.items():
+                    if sprite.feet.colliderect(warp.get_rect()):
+                        self.warps[name].go_inside(self.player)
+                    else:
+                        self.warps[name].go_outisde()
+
+            elif isinstance(sprite, Npc):
+                if sprite.feet.collidelist(self.walls) > -1:
+                    sprite.move_back(dt)
+
+            elif isinstance(sprite, TextEdit):
+                self.npc_1_position_x.position = [self.player.position[0] + -40, self.player.position[1] - 40]
+                self.npc_1_position_y.position = [self.player.position[0] + -40, self.player.position[1] - 60]
+                self.npc_1_position_x.text = f"X {self.player.position[0]:.2f}"
+                self.npc_1_position_y.text = f"Y {self.player.position[1]:.2f}"
+
+        fade_speed = 0.25
+
+        if self.fading == "IN":
+            self.alpha += fade_speed
+            if self.alpha >= 255:
+                self.fading = None
+                self.fade_end = True
+
+        elif self.fading == "OUT":
+            self.alpha -= fade_speed
+            if self.alpha <= 0:
+                self.fading = None
+
+        if self.fade_end is True:
+            self.initialize()
+            self.fade_end = False
+            self.fading = "OUT"
+
+    def draw(self, screen):
+
+        # center the map/screen on our Hero
+        self.group.center(self.player.rect.center)
+
+        # draw the map and all sprites
+        self.group.draw(screen)
+
+        if self.fading is not None:
+            self.fade_rect.set_alpha(self.alpha)
+            screen.blit(self.fade_rect, (0, 0))
+
     def add_bullet(self, bullet):
         self.group.add(bullet)
 
     def change_field(self, name):
-
+        self.fading = "IN"
         self.map_name = name
-
-        self.initialize()

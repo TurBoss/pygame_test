@@ -138,7 +138,7 @@
 </data>
  </layer>
  <objectgroup id="3" name="Object Layer 1">
-  <object id="1" type="warp" x="963.652" y="897.636" width="23.7727" height="33.7273">
+  <object id="1" type="warp" x="963.652" y="903.136" width="23.7727" height="26.7273">
    <properties>
     <property name="Map" value="01_map.tmx"/>
    </properties>
@@ -146,6 +146,6 @@
   </object>
   <object id="3" x="940" y="816.5" width="22.5" height="122.5"/>
   <object id="4" x="988.125" y="818" width="22.375" height="120.5"/>
-  <object id="6" x="962.875" y="817" width="24.75" height="79.125"/>
+  <object id="6" x="962.875" y="817" width="24.75" height="104.625"/>
  </objectgroup>
 </map>
