@@ -10,7 +10,7 @@ GRAY = (200, 200, 200)
 
 
 class TextEdit(pygame.sprite.Sprite):
-    def __init__(self, text, size, color, width, height):
+    def __init__(self, text, size, color, width, height, pos_x=None, pos_y=None):
         super(TextEdit, self).__init__()
 
         self._text = ""
@@ -20,7 +20,7 @@ class TextEdit(pygame.sprite.Sprite):
         self.widthwidth = width
         self.height = height
 
-        self._position = [0, 0]
+        self._position = [pos_x, pos_y]
         self._old_position = self.position
 
         self.font = pygame.font.SysFont(None, self.size)

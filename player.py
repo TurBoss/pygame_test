@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
     """
 
     def __init__(self, game, image) -> None:
-        super().__init__()
+        super(Player, self).__init__()
 
         self.game = game
 
@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.width = 34
         self.height = 34
 
-        frame_speed = 90
+        frame_speed = 128
 
         # self.sprite_sheet = SpriteSheet(self.image_path)
 

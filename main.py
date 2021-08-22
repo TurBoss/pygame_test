@@ -2,6 +2,8 @@ import os
 import time
 from collections import deque
 
+import oyaml as yaml
+
 import pygame
 
 from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, KEYDOWN, KEYUP
@@ -16,6 +18,7 @@ from pyscroll.group import PyscrollGroup
 
 from constants import RESOURCE_DIR, RED, GRAY
 
+from menu import Menu
 from field import Field
 
 from npc import Npc
@@ -42,9 +45,18 @@ class Game:
         self.screen = screen
 
         self.running = False
+        self.mode = "MENU"
         self.shooting = False
 
+
         base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        with open(os.path.join(base_dir, RESOURCE_DIR, "menu", "main.yml")) as fh:
+            options = yaml.load(fh, Loader=yaml.FullLoader)
+
+        self.menu = Menu(options)
+
+
         music_path = os.path.join(base_dir,
                                   RESOURCE_DIR,
                                   "music",
@@ -56,7 +68,10 @@ class Game:
         self.field = Field("01_map.tmx", self.screen.get_size())
 
     def draw(self) -> None:
-        self.field.draw(self.screen)
+        if self.mode == "MENU":
+            self.menu.draw(self.screen)
+        elif self.mode == "GAME":
+            self.field.draw(self.screen)
 
     def handle_input(self) -> None:
         """Handle pygame input events"""
@@ -73,7 +88,10 @@ class Game:
                 if event.key == K_ESCAPE:
                     break
 
-            self.field.handle_input(event)
+            if self.mode == "MENU":
+                self.menu.handle_input(event)
+            elif self.mode == "GAME":
+                self.field.handle_input(event)
 
             # this will be handled if the window is resized
             # elif event.type == VIDEORESIZE:
@@ -84,7 +102,10 @@ class Game:
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
-        self.field.update(dt)
+        if self.mode == "MENU":
+            self.menu.update(dt)
+        elif self.mode == "GAME":
+            self.field.update(dt)
 
     def run(self):
         """Run the game loop"""
