@@ -142,3 +142,6 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         projectile = Projectile(self)
         self.game.add_bullet(projectile)
+
+    def get_rect(self):
+        return self.rect

@@ -6,7 +6,7 @@ from constants import RESOURCE_DIR, RED, WHITE
 
 from cursor import Cursor
 from text_sprite import TextSprite
-
+from dialog import Dialog
 from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, KEYDOWN, KEYUP
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_MINUS, K_PLUS, K_ESCAPE, K_BACKSPACE, K_RETURN
 from pygame.locals import QUIT
@@ -24,6 +24,10 @@ class Menu:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.image_path = os.path.join(base_dir, RESOURCE_DIR, "menu", "background.png")
         self.background = pygame.image.load(self.image_path)
+
+        self.dialog = Dialog(440, 500, 220, 180)
+
+        self.sprite_group.add(self.dialog)
 
         for name, menu in self.options.items():
             for key, option in menu.items():

@@ -1,4 +1,3 @@
-"""Edit text with the keyboard."""
 from typing import List
 
 import pygame

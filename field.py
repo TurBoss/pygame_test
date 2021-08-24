@@ -42,20 +42,6 @@ class Field(object):
         # load data from pytmx
         self.tmx_data = load_pygame(self.file_path)
 
-        # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = []
-        self.warps = dict()
-        self.spawns = dict()
-
-        for obj in self.tmx_data.objects:
-            if obj.type == "warp":
-                self.warps[obj.name] = WarpPoint(obj)
-            elif obj.type == "spawn":
-                print("SPAWN FOUND")
-                self.spawns[obj.name] = (obj.x, obj.y)
-            else:
-                self.walls.append(Rect(obj.x, obj.y, obj.width, obj.height))
-
         # create new data source for pyscroll
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
 
@@ -76,12 +62,14 @@ class Field(object):
         self.hero_move_speed = 250  # pixels per second
 
         self.player = Player(self, image="pocky.png")
+
         self.npcs = []
-        self.npc_1 = Npc(self, self.player, "pocky.png", follower=True, wanderer=False)
-        self.charly = Npc(self, self.player, "pocky.png", follower=False, wanderer=True)
+
+        self.npc_1 = Npc(self, self.player, "rocky.png", 0, 0, 34, 34, follower=True, wanderer=False)
+        self.charly = Npc(self, self.player, "rocky.png", 0, 0, 34, 34, follower=False, wanderer=True)
+
+        self.npcs.append(self.npc_1)
         self.npcs.append(self.charly)
-        for name, spawn in self.spawns.items():
-            self.charly.position = self.spawns[name]
 
         # put the hero in the center of the map
         self.player.position = [400, 300]
@@ -91,6 +79,25 @@ class Field(object):
         self.group.add(self.player)
         self.group.add(self.npc_1)
         self.group.add(self.charly)
+
+        # setup level geometry with simple pygame rects, loaded from pytmx
+        self.walls = []
+        self.warps = dict()
+        self.spawns = dict()
+
+        for obj in self.tmx_data.objects:
+            if obj.type == "warp":
+                warp = WarpPoint(obj, "warp.png", 30)
+                self.warps[obj.name] = warp
+                self.group.add(warp)
+            elif obj.type == "spawn":
+                print("SPAWN FOUND")
+                self.spawns[obj.name] = (obj.x, obj.y)
+            else:
+                self.walls.append(Rect(obj.x, obj.y, obj.width, obj.height))
+
+        for name, spawn in self.spawns.items():
+            self.charly.position = self.spawns[name]
 
     def handle_input(self, event):
 
@@ -103,6 +110,7 @@ class Field(object):
                     self.player.velocity[event.axis] = event.value * self.hero_move_speed
                 else:
                     self.player.velocity[event.axis] = 0
+
             elif event.axis == 3:
                 if event.value > dead_zone or event.value < dead_zone:
                     self.map_layer.zoom += event.value / 10
@@ -150,31 +158,35 @@ class Field(object):
         # otherwise this will fail
         for sprite in self.group.sprites():
             if isinstance(sprite, Player):
+
                 if sprite.feet.collidelist(self.walls) > -1:
                     sprite.move_back(dt)
-                elif sprite.rect.collidelist(self.npcs) > -1:
-                    sprite.move_back(dt)
+                # elif sprite.rect.collidelist(self.npcs) > -1:
+                #     sprite.move_back(dt)
+
                 for name, warp in self.warps.items():
                     if sprite.feet.colliderect(warp.get_rect()):
                         self.warps[name].go_inside(self.player)
                     else:
                         self.warps[name].go_outisde()
 
-
-
             elif isinstance(sprite, Npc):
                 if sprite.feet.collidelist(self.walls) > -1:
                     sprite.move_back(dt)
 
-        fade_speed = 0.25
+                elif sprite.feet.colliderect(self.player.get_rect()):
+                    sprite.velocity[0] = 0
+                    sprite.velocity[1] = 0
 
         if self.fading == "IN":
+            fade_speed = 0.25
             self.alpha += fade_speed
             if self.alpha >= 255:
                 self.fading = None
                 self.fade_end = True
 
         elif self.fading == "OUT":
+            fade_speed = 0.25
             self.alpha -= fade_speed
             if self.alpha <= 0:
                 self.fading = None

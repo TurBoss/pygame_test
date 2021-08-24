@@ -5,7 +5,7 @@ import random
 
 import pygame
 
-from constants import RESOURCE_DIR
+from constants import ROOT_PATH, RESOURCE_DIR
 from projectile import Projectile
 from sprite_sheet import SpriteStripAnim
 from utils import Pid
@@ -16,8 +16,9 @@ class Npc(pygame.sprite.Sprite):
 
     """
 
-    def __init__(self, game, player, image, follower=False, wanderer=False) -> None:
-        super().__init__()
+    def __init__(self, game, player, image, x, y, width, height, follower=False, wanderer=False) -> None:
+        super(Npc, self).__init__()
+
 
         self.interval = None
         self.current_time = None
@@ -26,24 +27,26 @@ class Npc(pygame.sprite.Sprite):
         self.game = game
         self.player = player
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.image_path = os.path.join(base_dir, RESOURCE_DIR, image)
+        self.image_path = os.path.join(ROOT_PATH, RESOURCE_DIR, "sprites", image)
+
+        self.x = x
+        self.y = y
+
+        self.width = width
+        self.height = height
 
         self.follower = follower
         self.wanderer = wanderer
-
-        self.width = 34
-        self.height = 34
 
         frame_speed = 90
 
         # self.sprite_sheet = SpriteSheet(self.image_path)
 
-        self.anim_down = SpriteStripAnim(self.image_path, (0, 0, self.width, self.width), 5, -1, True, frame_speed)
-        self.anim_down_left = SpriteStripAnim(self.image_path, (0, 34, self.width, self.width), 5, -1, True, frame_speed)
-        self.anim_left = SpriteStripAnim(self.image_path, (0, 68, self.width, self.width), 5, -1, True, frame_speed)
-        self.anim_up_left = SpriteStripAnim(self.image_path, (0, 102, self.width, self.width), 5, -1, True, frame_speed)
-        self.anim_up = SpriteStripAnim(self.image_path, (0, 136, self.width, self.width), 5, -1, True, frame_speed)
+        self.anim_down = SpriteStripAnim(self.image_path, (0, 0, self.width, self.height), 5, -1, True, frame_speed)
+        self.anim_down_left = SpriteStripAnim(self.image_path, (0, self.height, self.width, self.height), 5, -1, True, frame_speed)
+        self.anim_left = SpriteStripAnim(self.image_path, (0, self.height * 2, self.width, self.height), 5, -1, True, frame_speed)
+        self.anim_up_left = SpriteStripAnim(self.image_path, (0, self.height * 3, self.width, self.height), 5, -1, True, frame_speed)
+        self.anim_up = SpriteStripAnim(self.image_path, (0, self.height*4, self.width, self.height), 5, -1, True, frame_speed)
 
         self.anim_list = list()
 
