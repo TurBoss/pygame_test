@@ -15,7 +15,6 @@ from constants import RESOURCE_DIR, RED
 from warp_point import WarpPoint
 from player import Player
 from npc import Npc
-from text_edit import TextEdit
 
 
 class Field(object):
@@ -46,10 +45,14 @@ class Field(object):
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls = []
         self.warps = dict()
+        self.spawns = dict()
 
         for obj in self.tmx_data.objects:
             if obj.type == "warp":
                 self.warps[obj.name] = WarpPoint(obj)
+            elif obj.type == "spawn":
+                print("SPAWN FOUND")
+                self.spawns[obj.name] = (obj.x, obj.y)
             else:
                 self.walls.append(Rect(obj.x, obj.y, obj.width, obj.height))
 
@@ -73,20 +76,12 @@ class Field(object):
         self.hero_move_speed = 250  # pixels per second
 
         self.player = Player(self, image="pocky.png")
-
-        self.npc_1 = Npc(self, self.player, "pocky.png", True)
-
-        self.npc_1_position_x = TextEdit("X",
-                                         size=32,
-                                         color=RED,
-                                         width=100,
-                                         height=100)
-
-        self.npc_1_position_y = TextEdit("Y",
-                                         size=32,
-                                         color=RED,
-                                         width=100,
-                                         height=100)
+        self.npcs = []
+        self.npc_1 = Npc(self, self.player, "pocky.png", follower=True, wanderer=False)
+        self.charly = Npc(self, self.player, "pocky.png", follower=False, wanderer=True)
+        self.npcs.append(self.charly)
+        for name, spawn in self.spawns.items():
+            self.charly.position = self.spawns[name]
 
         # put the hero in the center of the map
         self.player.position = [400, 300]
@@ -95,8 +90,7 @@ class Field(object):
         # add our hero to the group
         self.group.add(self.player)
         self.group.add(self.npc_1)
-        self.group.add(self.npc_1_position_x)
-        self.group.add(self.npc_1_position_y)
+        self.group.add(self.charly)
 
     def handle_input(self, event):
 
@@ -142,18 +136,6 @@ class Field(object):
             elif event.key == K_DOWN:
                 self.player.velocity[1] = self.hero_move_speed
 
-            # elif event.key == K_BACKSPACE:
-            #     if len(self.text) > 0:
-            #         self.text = self.text[:-1]
-            #         self.text_image = self.font.render(self.text, True, RED)
-            #         self.text_rect.size = self.text_image.get_size()
-            #         self.text_cursor.topleft = self.text_rect.topright
-            # else:
-            #     self.text += event.unicode
-            #     self.text_image = self.font.render(self.text, True, RED)
-            #     self.text_rect.size = self.text_image.get_size()
-            #     self.text_cursor.topleft = self.text_rect.topright
-
         elif event.type == KEYUP:
             if event.key == K_LEFT or event.key == K_RIGHT:
                 self.player.velocity[0] = 0
@@ -170,21 +152,19 @@ class Field(object):
             if isinstance(sprite, Player):
                 if sprite.feet.collidelist(self.walls) > -1:
                     sprite.move_back(dt)
+                elif sprite.rect.collidelist(self.npcs) > -1:
+                    sprite.move_back(dt)
                 for name, warp in self.warps.items():
                     if sprite.feet.colliderect(warp.get_rect()):
                         self.warps[name].go_inside(self.player)
                     else:
                         self.warps[name].go_outisde()
 
+
+
             elif isinstance(sprite, Npc):
                 if sprite.feet.collidelist(self.walls) > -1:
                     sprite.move_back(dt)
-
-            elif isinstance(sprite, TextEdit):
-                self.npc_1_position_x.position = [self.player.position[0] + -40, self.player.position[1] - 40]
-                self.npc_1_position_y.position = [self.player.position[0] + -40, self.player.position[1] - 60]
-                self.npc_1_position_x.text = f"X {self.player.position[0]:.2f}"
-                self.npc_1_position_y.text = f"Y {self.player.position[1]:.2f}"
 
         fade_speed = 0.25
 

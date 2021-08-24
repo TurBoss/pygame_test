@@ -16,7 +16,7 @@ class Menu:
     def __init__(self, options):
 
         self.options = options
-
+        self.index = None
         self.cursor = Cursor(400, 500, 3, 50)
 
         self.sprite_group = pygame.sprite.Group()
@@ -45,24 +45,25 @@ class Menu:
         # print("MENU DRAW")
 
     def update(self, dt):
+
         self.sprite_group.update(dt)
 
         # print("MENU DT")
     def handle_input(self, event):
-        dead_zone = 0.50
 
         if event.type == JOYAXISMOTION:
             if event.axis == 1:  # Y Axis = 1
-                if event.value > dead_zone:
+                if round(event.value) == -1.0:
                     self.cursor.move_up()
-                elif event.value < dead_zone:
+                elif round(event.value) == 1.0:
                     self.cursor.move_down()
 
         elif event.type == JOYBUTTONDOWN:
+
             if event.button == 1:
-                pass
+                self.index = self.cursor.get_position()
             elif event.button == 0:
-                pass
+                self.index = self.cursor.get_position()
 
         elif event.type == JOYBUTTONUP:
             if event.button == 2:
@@ -74,3 +75,6 @@ class Menu:
 
             elif event.key == K_DOWN:
                 self.cursor.move_down()
+
+    def get_mode(self):
+        return self.index

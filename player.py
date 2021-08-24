@@ -55,7 +55,6 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.feet = pygame.Rect(0, 0, self.rect.width * 0.5, 8)
 
-
     @property
     def position(self) -> List[float]:
         return list(self._position)

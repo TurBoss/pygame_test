@@ -12,8 +12,8 @@ class Cursor(pygame.sprite.Sprite):
 
         self.steps = steps
         self.step = step
-        self.current_step = 0
-        self.current_position = 0
+        self.current_step = 1
+        self.current_position = 1
 
         self.speed = 180
 
@@ -54,13 +54,18 @@ class Cursor(pygame.sprite.Sprite):
             self.velocity[1] = 0
 
     def move_up(self):
-        self.current_position = self._position[1]
-        if self.current_step > 0:
-            self.current_step -= 1
-            self.velocity[1] = -self.speed
+        if self.velocity[1] == 0:
+            self.current_position = self._position[1]
+            if self.current_step > 1:
+                self.current_step -= 1
+                self.velocity[1] = -self.speed
 
     def move_down(self):
-        self.current_position = self._position[1]
-        if self.current_step < self.steps:
-            self.current_step += 1
-            self.velocity[1] = self.speed
+        if self.velocity[1] == 0:
+            self.current_position = self._position[1]
+            if self.current_step < self.steps:
+                self.current_step += 1
+                self.velocity[1] = self.speed
+
+    def get_position(self):
+        return self.current_step

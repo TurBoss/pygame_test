@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+import random
+
 import pygame
 
 from constants import RESOURCE_DIR
@@ -14,8 +16,12 @@ class Npc(pygame.sprite.Sprite):
 
     """
 
-    def __init__(self, game, player, image, follower=False) -> None:
+    def __init__(self, game, player, image, follower=False, wanderer=False) -> None:
         super().__init__()
+
+        self.interval = None
+        self.current_time = None
+        self.previous_time = 0
 
         self.game = game
         self.player = player
@@ -24,6 +30,7 @@ class Npc(pygame.sprite.Sprite):
         self.image_path = os.path.join(base_dir, RESOURCE_DIR, image)
 
         self.follower = follower
+        self.wanderer = wanderer
 
         self.width = 34
         self.height = 34
@@ -52,7 +59,7 @@ class Npc(pygame.sprite.Sprite):
         self.facing = 0
         self.mirror = False
 
-        self.speed = 250
+        self.speed = 12
 
         self.velocity = [0, 0]
         self._position = [0.0, 0.0]
@@ -96,6 +103,8 @@ class Npc(pygame.sprite.Sprite):
 
         if self.follower:
             self.follow()
+        elif self.wanderer:
+            self.wander(dt)
 
         self._old_position = self._position[:]
         self._position[0] += self.velocity[0] * dt
@@ -216,3 +225,25 @@ class Npc(pygame.sprite.Sprite):
     def shoot(self):
         projectile = Projectile(self)
         self.game.add_bullet(projectile)
+
+    def wander(self, dt):
+
+        self.current_time = pygame.time.get_ticks()
+
+        self.interval = random.randint(1000, 10000)
+
+        if self.current_time - self.previous_time >= self.interval:
+            self.previous_time = self.current_time
+
+            direction = random.randint(0, 4)
+            if direction == 0:
+                self.velocity[0] = -self.speed
+            elif direction == 1:
+                self.velocity[1] = -self.speed
+            elif direction == 2:
+                self.velocity[0] = self.speed
+            elif direction == 3:
+                self.velocity[1] = self.speed
+            else:
+                self.velocity[0] = 0
+                self.velocity[1] = 0

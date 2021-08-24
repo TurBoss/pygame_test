@@ -225,10 +225,10 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="21" x="1265.33" y="1057.33">
-   <point/>
-  </object>
-  <object id="22" x="1128.67" y="1151.33">
+  <object id="21" name="npc_spaw_1" type="spawn" x="1256.83" y="1113.83">
+   <properties>
+    <property name="Npc" value="Charly"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>

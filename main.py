@@ -10,23 +10,10 @@ from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, KEYDOWN, KE
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_MINUS, K_PLUS, K_ESCAPE, K_BACKSPACE
 from pygame.locals import VIDEORESIZE, QUIT
 
-from pytmx.util_pygame import load_pygame
-
-import pyscroll
-import pyscroll.data
-from pyscroll.group import PyscrollGroup
-
 from constants import RESOURCE_DIR, RED, GRAY
 
 from menu import Menu
 from field import Field
-
-from npc import Npc
-from player import Player
-
-
-# simple wrapper to keep the screen resizeable
-from text_edit import TextEdit
 
 
 def init_screen(width: int, height: int) -> pygame.Surface:
@@ -48,7 +35,6 @@ class Game:
         self.mode = "MENU"
         self.shooting = False
 
-
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
         with open(os.path.join(base_dir, RESOURCE_DIR, "menu", "main.yml")) as fh:
@@ -56,14 +42,13 @@ class Game:
 
         self.menu = Menu(options)
 
-
         music_path = os.path.join(base_dir,
                                   RESOURCE_DIR,
                                   "music",
                                   "02 Main Theme.ogg")
 
-        # pygame.mixer.music.load(music_path)
-        # pygame.mixer.music.play(-1)
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.play(-1)
 
         self.field = Field("01_map.tmx", self.screen.get_size())
 
@@ -86,6 +71,7 @@ class Game:
 
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
+                    self.running = False
                     break
 
             if self.mode == "MENU":
@@ -104,6 +90,11 @@ class Game:
         """Tasks that occur over time should be handled here"""
         if self.mode == "MENU":
             self.menu.update(dt)
+            option = self.menu.get_mode()
+            if option == 1:
+                self.mode = "GAME"
+            elif option == 3:
+                self.running = False
         elif self.mode == "GAME":
             self.field.update(dt)
 
@@ -130,9 +121,11 @@ class Game:
 
 
 def main() -> None:
+
     pygame.init()
     pygame.font.init()
     pygame.joystick.init()
+
     joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
     if joysticks:
@@ -142,7 +135,7 @@ def main() -> None:
         print(f"\t1 {joystick.get_name()}")
 
     screen = init_screen(1024, 768)
-    pygame.display.set_caption("Turbo Pocky Rocky - An epic journey.")
+    pygame.display.set_caption("Turbo Pocky Rocky")
 
     try:
         game = Game(screen)
