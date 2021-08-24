@@ -2,13 +2,13 @@
 import os
 
 import pygame
-from constants import RESOURCE_DIR, RED
+from constants import RESOURCE_DIR, RED, WHITE
 
 from cursor import Cursor
-from text_edit import TextEdit
+from text_sprite import TextSprite
 
 from pygame import JOYAXISMOTION, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, KEYDOWN, KEYUP
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_MINUS, K_PLUS, K_ESCAPE, K_BACKSPACE
+from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_MINUS, K_PLUS, K_ESCAPE, K_BACKSPACE, K_RETURN
 from pygame.locals import QUIT
 
 
@@ -17,7 +17,7 @@ class Menu:
 
         self.options = options
         self.index = None
-        self.cursor = Cursor(400, 500, 3, 50)
+        self.cursor = Cursor(600, 525, 3, 50)
 
         self.sprite_group = pygame.sprite.Group()
 
@@ -26,15 +26,8 @@ class Menu:
         self.background = pygame.image.load(self.image_path)
 
         for name, menu in self.options.items():
-            for key, value in menu.items():
-                text = TextEdit(text=value.get("text"),
-                                size=value.get("size"),
-                                color=RED,
-                                width=100,
-                                height=100,
-                                pos_x=value.get("pos_x"),
-                                pos_y=value.get("pos_y"))
-
+            for key, option in menu.items():
+                text = TextSprite(option)
                 self.sprite_group.add(text)
 
         self.sprite_group.add(self.cursor)
@@ -75,6 +68,9 @@ class Menu:
 
             elif event.key == K_DOWN:
                 self.cursor.move_down()
+
+            elif event.key == K_RETURN:
+                self.index = self.cursor.get_position()
 
     def get_mode(self):
         return self.index

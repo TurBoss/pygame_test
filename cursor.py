@@ -1,9 +1,10 @@
-
+import os
 from typing import List
 
 import pygame
 import pygame.gfxdraw
 
+from constants import RESOURCE_DIR, ROOT_PATH
 
 class Cursor(pygame.sprite.Sprite):
 
@@ -17,16 +18,17 @@ class Cursor(pygame.sprite.Sprite):
 
         self.speed = 180
 
-        cursor_img = pygame.Surface((30, 30), pygame.SRCALPHA)
-        # draw.circle is not anti-aliased and looks rather ugly.
-        # pygame.draw.circle(ATOM_IMG, (0, 255, 0), (15, 15), 15)
-        # gfxdraw.aacircle looks a bit better.
-        pygame.gfxdraw.aacircle(cursor_img, 15, 15, 14, (0, 255, 0))
-        pygame.gfxdraw.filled_circle(cursor_img, 15, 15, 14, (0, 255, 0))
+        image = "cursor.png"
+        self.image_path = os.path.join(ROOT_PATH, RESOURCE_DIR, "menu", image)
+        print(self.image_path)
+        self.cursor_sheet = pygame.image.load(self.image_path).convert_alpha()
 
-
-        self.image = cursor_img
+        rect = pygame.rect.Rect(0, 0, 48, 48)
+        self.image = self.image_at(self.cursor_sheet, rect)
         self.rect = self.image.get_rect(center=(150, 200))
+
+        rect = pygame.rect.Rect(48, 0, 48, 48)
+        self.alt_image = self.image_at(self.cursor_sheet, rect)
 
         self.velocity = [0, 0]
         self._position = [0.0, 0.0]
@@ -68,4 +70,13 @@ class Cursor(pygame.sprite.Sprite):
                 self.velocity[1] = self.speed
 
     def get_position(self):
+        self.image = self.alt_image
         return self.current_step
+
+    # Load a specific image from a specific rectangle
+    def image_at(self, src, rectangle):
+        """Loads image from x, y, m, x+offset, y+offset"""
+        rect = pygame.Rect(rectangle)
+        image = pygame.Surface(rect.size, pygame.SRCALPHA).convert_alpha()
+        image.blit(src, (0, 0), rect)
+        return image

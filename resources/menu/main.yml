@@ -2,20 +2,23 @@ main:
   start:
     name: start
     text: Start
-    pos_x: 450
-    pos_y: 500
     size: 48
+    font: "Arial Black"
+    color: white
+    position: [450, 500]
 
   options:
     name: options
     text: Options
-    pos_x: 450
-    pos_y: 550
     size: 48
+    font: "Arial Black"
+    color: white
+    position: [450, 550]
 
   quit:
     name: quit
     text: Quit
-    pos_x: 450
-    pos_y: 600
     size: 48
+    font: "Arial Black"
+    color: white
+    position: [450, 600]
