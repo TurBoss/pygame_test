@@ -13,9 +13,10 @@ from pygame.locals import QUIT
 
 
 class Menu:
-    def __init__(self, options):
+    def __init__(self, options, music):
 
         self.options = options
+        self.music = music
         self.index = None
         self.cursor = Cursor(600, 525, 3, 50)
 
@@ -35,6 +36,9 @@ class Menu:
                 self.sprite_group.add(text)
 
         self.sprite_group.add(self.cursor)
+
+        self.music.change_music(0)
+        self.music.play_music()
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))

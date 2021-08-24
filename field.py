@@ -18,10 +18,11 @@ from npc import Npc
 
 
 class Field(object):
-    def __init__(self, name, screen_size):
+    def __init__(self, name, screen_size, music):
 
         self.map_name = name
         self.screen_size = screen_size
+        self.music = music
 
         self.fading = None
         self.fade_end = False
@@ -37,6 +38,9 @@ class Field(object):
         self.initialize()
 
     def initialize(self):
+
+        # self.music.change_music(2)
+        # self.music.play_music()
 
         self.file_path = os.path.join(self.base_dir, RESOURCE_DIR, "maps", self.map_name)
         # load data from pytmx
@@ -72,7 +76,6 @@ class Field(object):
         self.npcs.append(self.charly)
 
         # put the hero in the center of the map
-        self.player.position = [400, 300]
         self.npc_1.position = [300, 300]
 
         # add our hero to the group
@@ -93,6 +96,9 @@ class Field(object):
             elif obj.type == "spawn":
                 print("SPAWN FOUND")
                 self.spawns[obj.name] = (obj.x, obj.y)
+            elif obj.type == "player":
+                print("PLAYER SPAWN FOUND")
+                self.player.position = [obj.x, obj.y]
             else:
                 self.walls.append(Rect(obj.x, obj.y, obj.width, obj.height))
 

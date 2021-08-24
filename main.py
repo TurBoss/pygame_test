@@ -12,6 +12,7 @@ from pygame.locals import VIDEORESIZE, QUIT
 
 from constants import RESOURCE_DIR, RED, GRAY
 
+from music_list import MusicList
 from menu import Menu
 from field import Field
 
@@ -30,7 +31,7 @@ class Game:
 
     def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
-
+        self.music_list = MusicList()
         self.running = False
         self.mode = "MENU"
         self.shooting = False
@@ -40,17 +41,9 @@ class Game:
         with open(os.path.join(base_dir, RESOURCE_DIR, "menu", "main.yml")) as fh:
             options = yaml.load(fh, Loader=yaml.FullLoader)
 
-        self.menu = Menu(options)
+        self.menu = Menu(options, self.music_list)
 
-        music_path = os.path.join(base_dir,
-                                  RESOURCE_DIR,
-                                  "music",
-                                  "02 Main Theme.ogg")
-
-        pygame.mixer.music.load(music_path)
-        pygame.mixer.music.play(-1)
-
-        self.field = Field("01_map.tmx", self.screen.get_size())
+        self.field = Field("01_map.tmx", self.screen.get_size(), self.music_list)
 
     def draw(self) -> None:
         if self.mode == "MENU":
@@ -93,6 +86,8 @@ class Game:
             option = self.menu.get_mode()
             if option == 1:
                 self.mode = "GAME"
+            elif option == 2:
+                pass
             elif option == 3:
                 self.running = False
         elif self.mode == "GAME":

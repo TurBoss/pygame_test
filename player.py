@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.width = 34
         self.height = 34
 
-        frame_speed = 128
+        frame_speed = 60
 
         # self.sprite_sheet = SpriteSheet(self.image_path)
 
